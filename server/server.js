@@ -55,9 +55,18 @@ setInterval(() => {
       io.emit('stateUpdate', mats);
       if (mat.timer <= 0) {
         mat.isTimerRunning = false;
-        // Finalizar ronda
         if (mat.settings.bestOfThree) {
+          // Determinar ganador del round
           determineRoundWinner(matId);
+          // Verificar si hay un campeón final
+          if (mat.redRoundWins >= 2 || mat.blueRoundWins >= 2) {
+            // Combate terminado, no pasar al siguiente round
+            mat.isTimerRunning = false;
+          } else {
+            // Pasar al siguiente round
+            resetRound(matId);
+            mat.roundNumber += 1;
+          }
         }
       }
     }
@@ -98,12 +107,6 @@ function determineRoundWinner(matId) {
     } else {
       mat.blueRoundWins += 1;
     }
-  }
-
-  // Verificar ganador del combate
-  if (mat.settings.bestOfThree && (mat.redRoundWins >= 2 || mat.blueRoundWins >= 2)) {
-    // Combate terminado
-    mat.isTimerRunning = false;
   }
 }
 
@@ -146,6 +149,7 @@ io.on('connection', (socket) => {
           mat.blueRoundWins += 1;
           if (mat.settings.bestOfThree) {
             resetRound(matId);
+            mat.roundNumber += 1; // Incrementar el número del round
           }
         }
       } else {
@@ -154,6 +158,7 @@ io.on('connection', (socket) => {
           mat.redRoundWins += 1;
           if (mat.settings.bestOfThree) {
             resetRound(matId);
+            mat.roundNumber += 1; // Incrementar el número del round
           }
         }
       }

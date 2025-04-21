@@ -29,17 +29,15 @@
 
         <div class="scores">
             <div class="competitor blue">
-                <span>Azul: <span id="blueScore"></span></span>
-                <div id="blueGamjeoms" class="gamjeoms"></div>
+                <span id="blueScore"></span>
+                <div id="blueGamjeoms" class="gamjeoms blue"></div>
             </div>
             <div class="timer-controls">
-                <button onclick="adjustTimer(-10)">-10s</button>
                 <span class="timer">Tiempo: <span id="timer"></span></span>
-                <button onclick="adjustTimer(10)">+10s</button>
             </div>
             <div class="competitor red">
-                <span>Rojo: <span id="redScore"></span></span>
-                <div id="redGamjeoms" class="gamjeoms"></div>
+                <span id="redScore"></span>
+                <div id="redGamjeoms" class="gamjeoms red"></div>
             </div>
         </div>
 
@@ -116,10 +114,6 @@
 
         function toggleTimer() {
             sendAction(mats[currentMat].isTimerRunning ? 'stopTimer' : 'startTimer');
-        }
-
-        function adjustTimer(seconds) {
-            sendAction('adjustTimer', { seconds });
         }
 
         function techniqueAction(color, technique) {

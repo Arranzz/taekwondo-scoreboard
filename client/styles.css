@@ -100,6 +100,13 @@ button {
     color: white;
 }
 
+#blueScore, #redScore {
+    display: block;
+    font-size: 3em; /* Número mucho más grande */
+    font-weight: bold;
+    line-height: 1;
+}
+
 .timer-controls {
     width: 30%;
     text-align: center;
@@ -128,13 +135,13 @@ button {
     margin: 0 5px;
     padding: 10px 20px;
     font-size: 1.2em;
-    background-color: #ffc107;
+    background-color: #fbd871;
     border: none;
     border-radius: 5px;
 }
 
 .mode-toggle .active {
-    background-color: #ffca2c;
+    background-color: #ffbf00;
 }
 
 .controls {
@@ -272,6 +279,14 @@ button {
     color: black;
 }
 
+.mat-display .total-score {
+    display: block;
+    font-size: 4em; /* Número mucho más grande */
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
 .mat-display .timer {
     width: 30%;
     text-align: center;
@@ -284,7 +299,6 @@ button {
 .mat-display .winner {
     font-size: 2em;
     font-weight: bold;
-    color: #ffd700;
     text-align: center;
     margin-top: 20px;
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
