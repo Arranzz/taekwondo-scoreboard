@@ -55,7 +55,8 @@
                 <button onclick="techniqueAction('blue', 'peto')">PETO +2</button>
                 <button onclick="techniqueAction('blue', 'casco')">CASCO +3</button>
                 <button onclick="techniqueAction('blue', 'giro')">GIRO +2</button>
-                <button onclick="gamjeomAction('red')">Gamjeom a Rojo</button>
+                <button onclick="gamjeomAction('blue')">Gamjeom a Azul</button>
+                
             </div>
             <div class="competitor red">
                 <h3>Rojo</h3>
@@ -63,7 +64,7 @@
                 <button onclick="techniqueAction('red', 'peto')">PETO +2</button>
                 <button onclick="techniqueAction('red', 'casco')">CASCO +3</button>
                 <button onclick="techniqueAction('red', 'giro')">GIRO +2</button>
-                <button onclick="gamjeomAction('blue')">Gamjeom a Azul</button>
+                <button onclick="gamjeomAction('red')">Gamjeom a Rojo</button>
             </div>
         </div>
 
@@ -170,8 +171,8 @@
 
                 updateRoundWins('blue', mat.blueRoundWins, mat.settings.bestOfThree);
                 updateRoundWins('red', mat.redRoundWins, mat.settings.bestOfThree);
-                updateGamjeoms('blue', mat.blueGamjeoms);
-                updateGamjeoms('red', mat.redGamjeoms);
+                updateGamjeoms('blue', mat.blueGamjeoms); // Gamjeoms del competidor azul
+                updateGamjeoms('red', mat.redGamjeoms); // Gamjeoms del competidor rojo
             }
         });
 
@@ -200,7 +201,7 @@
                 const square = document.createElement('div');
                 square.className = 'gamjeom-square';
                 if (i < count) {
-                    square.style.backgroundColor = color === 'blue' ? '#0000ff' : '#ff0000';
+                    square.style.backgroundColor = color === 'blue' ? '#0000ff' : '#ff0000'; // Color del propio competidor
                 }
                 container.appendChild(square);
             }
