@@ -28,18 +28,18 @@
         </div>
 
         <div class="scores">
-            <div class="competitor red">
-                <span>Rojo: <span id="redScore"></span></span>
-                <div id="redGamjeoms" class="gamjeoms"></div>
+            <div class="competitor blue">
+                <span>Azul: <span id="blueScore"></span></span>
+                <div id="blueGamjeoms" class="gamjeoms"></div>
             </div>
             <div class="timer-controls">
                 <button onclick="adjustTimer(-10)">-10s</button>
                 <span class="timer">Tiempo: <span id="timer"></span></span>
                 <button onclick="adjustTimer(10)">+10s</button>
             </div>
-            <div class="competitor blue">
-                <span>Azul: <span id="blueScore"></span></span>
-                <div id="blueGamjeoms" class="gamjeoms"></div>
+            <div class="competitor red">
+                <span>Rojo: <span id="redScore"></span></span>
+                <div id="redGamjeoms" class="gamjeoms"></div>
             </div>
         </div>
 
@@ -51,14 +51,6 @@
         </div>
 
         <div class="controls">
-            <div class="competitor red">
-                <h3>Rojo</h3>
-                <button onclick="techniqueAction('red', 'puno')">PUÑO +1</button>
-                <button onclick="techniqueAction('red', 'peto')">PETO +2</button>
-                <button onclick="techniqueAction('red', 'casco')">CASCO +3</button>
-                <button onclick="techniqueAction('red', 'giro')">GIRO +2</button>
-                <button onclick="gamjeomAction('blue')">Gamjeom a Azul</button>
-            </div>
             <div class="competitor blue">
                 <h3>Azul</h3>
                 <button onclick="techniqueAction('blue', 'puno')">PUÑO +1</button>
@@ -66,6 +58,14 @@
                 <button onclick="techniqueAction('blue', 'casco')">CASCO +3</button>
                 <button onclick="techniqueAction('blue', 'giro')">GIRO +2</button>
                 <button onclick="gamjeomAction('red')">Gamjeom a Rojo</button>
+            </div>
+            <div class="competitor red">
+                <h3>Rojo</h3>
+                <button onclick="techniqueAction('red', 'puno')">PUÑO +1</button>
+                <button onclick="techniqueAction('red', 'peto')">PETO +2</button>
+                <button onclick="techniqueAction('red', 'casco')">CASCO +3</button>
+                <button onclick="techniqueAction('red', 'giro')">GIRO +2</button>
+                <button onclick="gamjeomAction('blue')">Gamjeom a Azul</button>
             </div>
         </div>
 

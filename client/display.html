@@ -180,7 +180,10 @@
 
             if (mat.settings.bestOfThree && (mat.redRoundWins >= 2 || mat.blueRoundWins >= 2)) {
                 const winner = mat.redRoundWins >= 2 ? 'Rojo' : 'Azul';
-                matDiv.querySelector('.winner').textContent = `GANADOR: ${winner}`;
+                const winnerColor = winner === 'Rojo' ? '#ff0000' : '#0000ff';
+                const winnerElement = matDiv.querySelector('.winner');
+                winnerElement.textContent = `GANADOR: ${winner}`;
+                winnerElement.style.color = winnerColor;
             } else {
                 matDiv.querySelector('.winner').textContent = '';
             }
