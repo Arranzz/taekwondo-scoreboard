@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcador</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="viewSelection">
+        <h1>Seleccionar Vista</h1>
+        <button onclick="selectView('tapiz1')">Tapiz 1</button>
+        <button onclick="selectView('tapiz2')">Tapiz 2</button>
+        <button onclick="selectView('general')">Vista General</button>
+    </div>
+
+    <div id="display" style="display:none;">
+        <div id="mat1" class="mat-display" data-mat="1">
+            <h2>Tapiz 1</h2>
+            <div class="round-info">
+                <div class="blue-round-wins"></div>
+                <span>Round: <span class="round-number"></span></span>
+                <div class="red-round-wins"></div>
+            </div>
+            <div class="scores">
+                <div class="competitor blue">
+                    <h3>Azul: <span class="total-score"></span></h3>
+                    <p>PUÑO: <span class="puno"></span></p>
+                    <p>PETO: <span class="peto"></span></p>
+                    <p>CASCO: <span class="casco"></span></p>
+                    <p>GIRO: <span class="giro"></span></p>
+                    <div class="gamjeoms"></div>
+                </div>
+                <div class="timer">
+                    <span class="timer"></span>
+                </div>
+                <div class="competitor red">
+                    <h3>Rojo: <span class="total-score"></span></h3>
+                    <p>PUÑO: <span class="puno"></span></p>
+                    <p>PETO: <span class="peto"></span></p>
+                    <p>CASCO: <span class="casco"></span></p>
+                    <p>GIRO: <span class="giro"></span></p>
+                    <div class="gamjeoms"></div>
+                </div>
+            </div>
+            <div class="winner"></div>
+        </div>
+        <div id="mat2" class="mat-display" data-mat="2">
+            <h2>Tapiz 2</h2>
+            <div class="round-info">
+                <div class="blue-round-wins"></div>
+                <span>Round: <span class="round-number"></span></span>
+                <div class="red-round-wins"></div>
+            </div>
+            <div class="scores">
+                <div class="competitor blue">
+                    <h3>Azul: <span class="total-score"></span></h3>
+                    <p>PUÑO: <span class="puno"></span></p>
+                    <p>PETO: <span class="peto"></span></p>
+                    <p>CASCO: <span class="casco"></span></p>
+                    <p>GIRO: <span class="giro"></span></p>
+                    <div class="gamjeoms"></div>
+                </div>
+                <div class="timer">
+                    <span class="timer"></span>
+                </div>
+                <div class="competitor red">
+                    <h3>Rojo: <span class="total-score"></span></h3>
+                    <p>PUÑO: <span class="puno"></span></p>
+                    <p>PETO: <span class="peto"></span></p>
+                    <p>CASCO: <span class="casco"></span></p>
+                    <p>GIRO: <span class="giro"></span></p>
+                    <div class="gamjeoms"></div>
+                </div>
+            </div>
+            <div class="winner"></div>
+        </div>
+        <div id="navigation">
+            <button onclick="selectView('tapiz1')">Tapiz 1</button>
+            <button onclick="selectView('tapiz2')">Tapiz 2</button>
+            <button onclick="selectView('general')">Vista General</button>
+            <button onclick="goHome()">Volver</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let currentView = null;
+
+        function selectView(view) {
+            currentView = view;
+            document.getElementById('viewSelection').style.display = 'none';
+            document.getElementById('display').style.display = 'flex';
+            document.getElementById('display').className = view === 'general' ? 'general-view' : '';
+            if (view === 'tapiz1') {
+                document.getElementById('mat1').style.display = 'block';
+                document.getElementById('mat2').style.display = 'none';
+            } else if (view === 'tapiz2') {
+                document.getElementById('mat1').style.display = 'none';
+                document.getElementById('mat2').style.display = 'block';
+            } else if (view === 'general') {
+                document.getElementById('mat1').style.display = 'block';
+                document.getElementById('mat2').style.display = 'block';
+            }
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function calculateTotalScore(techniques, opponentGamjeoms) {
+            const techniquePoints = (techniques.puno * 1) + (techniques.peto * 2) + (techniques.casco * 3) + (techniques.giro * 2);
+            return techniquePoints + (opponentGamjeoms * 1);
+        }
+
+        function updateGamjeoms(container, count, color) {
+            container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const square = document.createElement('div');
+                square.className = 'gamjeom-square';
+                if (i < count) {
+                    square.style.backgroundColor = color;
+                }
+                container.appendChild(square);
+            }
+        }
+
+        function updateRoundWins(container, count, color) {
+            container.innerHTML = '';
+            for (let i = 0; i < 2; i++) {
+                const square = document.createElement('div');
+                square.className = 'round-win-square';
+                if (i < count) {
+                    square.style.backgroundColor = color;
+                }
+                container.appendChild(square);
+            }
+        }
+
+        function updateMatDisplay(matId, mat) {
+            const matDiv = document.querySelector(`.mat-display[data-mat="${matId}"]`);
+            if (!matDiv) return;
+
+            matDiv.querySelector('.round-number').textContent = mat.roundNumber;
+            matDiv.querySelector('.timer').textContent = formatTime(mat.timer);
+
+            const blueTotal = calculateTotalScore(mat.blueTechniques, mat.redGamjeoms);
+            matDiv.querySelector('.competitor.blue .total-score').textContent = blueTotal;
+
+            const redTotal = calculateTotalScore(mat.redTechniques, mat.blueGamjeoms);
+            matDiv.querySelector('.competitor.red .total-score').textContent = redTotal;
+
+            matDiv.querySelector('.competitor.blue .puno').textContent = mat.blueTechniques.puno;
+            matDiv.querySelector('.competitor.blue .peto').textContent = mat.blueTechniques.peto;
+            matDiv.querySelector('.competitor.blue .casco').textContent = mat.blueTechniques.casco;
+            matDiv.querySelector('.competitor.blue .giro').textContent = mat.blueTechniques.giro;
+
+            matDiv.querySelector('.competitor.red .puno').textContent = mat.redTechniques.puno;
+            matDiv.querySelector('.competitor.red .peto').textContent = mat.redTechniques.peto;
+            matDiv.querySelector('.competitor.red .casco').textContent = mat.redTechniques.casco;
+            matDiv.querySelector('.competitor.red .giro').textContent = mat.redTechniques.giro;
+
+            updateGamjeoms(matDiv.querySelector('.competitor.blue .gamjeoms'), mat.blueGamjeoms, '#0000ff');
+            updateGamjeoms(matDiv.querySelector('.competitor.red .gamjeoms'), mat.redGamjeoms, '#ff0000');
+
+            if (mat.settings.bestOfThree) {
+                updateRoundWins(matDiv.querySelector('.blue-round-wins'), mat.blueRoundWins, '#0000ff');
+                updateRoundWins(matDiv.querySelector('.red-round-wins'), mat.redRoundWins, '#ff0000');
+            } else {
+                matDiv.querySelector('.blue-round-wins').innerHTML = '';
+                matDiv.querySelector('.red-round-wins').innerHTML = '';
+            }
+
+            if (mat.settings.bestOfThree && (mat.redRoundWins >= 2 || mat.blueRoundWins >= 2)) {
+                const winner = mat.redRoundWins >= 2 ? 'Rojo' : 'Azul';
+                matDiv.querySelector('.winner').textContent = `GANADOR: ${winner}`;
+            } else {
+                matDiv.querySelector('.winner').textContent = '';
+            }
+        }
+
+        socket.on('stateUpdate', (mats) => {
+            updateMatDisplay(1, mats[1]);
+            updateMatDisplay(2, mats[2]);
+        });
+    </script>
+</body>
+</html>

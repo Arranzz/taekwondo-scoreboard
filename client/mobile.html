@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Marcador</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="matSelection">
+        <h1>Seleccionar Tapiz</h1>
+        <button onclick="selectMat(1)">Tapiz 1</button>
+        <button onclick="selectMat(2)">Tapiz 2</button>
+    </div>
+
+    <div id="control" style="display:none;">
+        <button onclick="goHome()">🏠</button>
+        <h2>Tapiz <span id="matId"></span></h2>
+        <button onclick="nextRound()">Siguiente Round</button>
+        <button onclick="openOptions()">Opciones</button>
+        <button onclick="reset()">Reiniciar</button>
+
+        <div class="round-info">
+            <span>Round: <span id="roundNumber"></span></span>
+            <div id="blueRoundWins" class="round-wins"></div>
+            <div id="redRoundWins" class="round-wins"></div>
+        </div>
+
+        <div class="scores">
+            <div class="competitor red">
+                <span>Rojo: <span id="redScore"></span></span>
+                <div id="redGamjeoms" class="gamjeoms"></div>
+            </div>
+            <div class="timer-controls">
+                <button onclick="adjustTimer(-10)">-10s</button>
+                <span class="timer">Tiempo: <span id="timer"></span></span>
+                <button onclick="adjustTimer(10)">+10s</button>
+            </div>
+            <div class="competitor blue">
+                <span>Azul: <span id="blueScore"></span></span>
+                <div id="blueGamjeoms" class="gamjeoms"></div>
+            </div>
+        </div>
+
+        <button id="timerButton" onclick="toggleTimer()">Iniciar Temporizador</button>
+
+        <div class="mode-toggle">
+            <button id="addMode" class="active">+</button>
+            <button id="subtractMode">-</button>
+        </div>
+
+        <div class="controls">
+            <div class="competitor red">
+                <h3>Rojo</h3>
+                <button onclick="techniqueAction('red', 'puno')">PUÑO +1</button>
+                <button onclick="techniqueAction('red', 'peto')">PETO +2</button>
+                <button onclick="techniqueAction('red', 'casco')">CASCO +3</button>
+                <button onclick="techniqueAction('red', 'giro')">GIRO +2</button>
+                <button onclick="gamjeomAction('blue')">Gamjeom a Azul</button>
+            </div>
+            <div class="competitor blue">
+                <h3>Azul</h3>
+                <button onclick="techniqueAction('blue', 'puno')">PUÑO +1</button>
+                <button onclick="techniqueAction('blue', 'peto')">PETO +2</button>
+                <button onclick="techniqueAction('blue', 'casco')">CASCO +3</button>
+                <button onclick="techniqueAction('blue', 'giro')">GIRO +2</button>
+                <button onclick="gamjeomAction('red')">Gamjeom a Rojo</button>
+            </div>
+        </div>
+
+        <div id="options" style="display:none;">
+            <h3>Opciones</h3>
+            <label>Duración del round:
+                <select id="roundDuration">
+                    <option value="30">0:30</option>
+                    <option value="45">0:45</option>
+                    <option value="60">1:00</option>
+                    <option value="75">1:15</option>
+                    <option value="90">1:30</option>
+                    <option value="105">1:45</option>
+                    <option value="120" selected>2:00</option>
+                </select>
+            </label>
+            <label>Al mejor de tres:
+                <input type="checkbox" id="bestOfThree" checked>
+            </label>
+            <label>Modo gamjeoms válidos:
+                <input type="checkbox" id="gamjeomValidity" checked>
+            </label>
+            <button onclick="saveOptions()">Guardar</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let currentMat = null;
+        let mode = 'add';
+
+        function selectMat(matId) {
+            currentMat = matId;
+            document.getElementById('matId').textContent = matId;
+            document.getElementById('matSelection').style.display = 'none';
+            document.getElementById('control').style.display = 'block';
+        }
+
+        function goHome() {
+            currentMat = null;
+            document.getElementById('control').style.display = 'none';
+            document.getElementById('matSelection').style.display = 'block';
+        }
+
+        function sendAction(action, payload) {
+            socket.emit('action', { matId: currentMat, action, payload });
+        }
+
+        function toggleTimer() {
+            sendAction(mats[currentMat].isTimerRunning ? 'stopTimer' : 'startTimer');
+        }
+
+        function adjustTimer(seconds) {
+            sendAction('adjustTimer', { seconds });
+        }
+
+        function techniqueAction(color, technique) {
+            const action = mode === 'add' ? 'addTechnique' : 'subtractTechnique';
+            sendAction(action, { color, technique });
+        }
+
+        function gamjeomAction(color) {
+            const action = mode === 'add' ? 'addGamjeom' : 'subtractGamjeom';
+            sendAction(action, { color });
+        }
+
+        function nextRound() {
+            sendAction('nextRound');
+        }
+
+        function reset() {
+            sendAction('reset');
+        }
+
+        function openOptions() {
+            document.getElementById('options').style.display = 'block';
+        }
+
+        function saveOptions() {
+            const duration = parseInt(document.getElementById('roundDuration').value);
+            const bestOfThree = document.getElementById('bestOfThree').checked;
+            const gamjeomValidity = document.getElementById('gamjeomValidity').checked;
+            sendAction('setSettings', { roundDuration: duration, bestOfThree, gamjeomValidity });
+            document.getElementById('options').style.display = 'none';
+        }
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function calculateTotalScore(techniques, opponentGamjeoms) {
+            const techniquePoints = (techniques.puno * 1) + (techniques.peto * 2) + (techniques.casco * 3) + (techniques.giro * 2);
+            return techniquePoints + (opponentGamjeoms * 1);
+        }
+
+        let mats = {};
+        socket.on('stateUpdate', (matsData) => {
+            mats = matsData;
+            if (currentMat) {
+                const mat = mats[currentMat];
+                document.getElementById('roundNumber').textContent = mat.roundNumber;
+                document.getElementById('blueScore').textContent = calculateTotalScore(mat.blueTechniques, mat.redGamjeoms);
+                document.getElementById('redScore').textContent = calculateTotalScore(mat.redTechniques, mat.blueGamjeoms);
+                document.getElementById('timer').textContent = formatTime(mat.timer);
+                document.getElementById('timerButton').textContent = mat.isTimerRunning ? 'Parar Temporizador' : 'Iniciar Temporizador';
+
+                updateRoundWins('blue', mat.blueRoundWins, mat.settings.bestOfThree);
+                updateRoundWins('red', mat.redRoundWins, mat.settings.bestOfThree);
+                updateGamjeoms('blue', mat.blueGamjeoms);
+                updateGamjeoms('red', mat.redGamjeoms);
+            }
+        });
+
+        function updateRoundWins(color, count, bestOfThree) {
+            const container = document.getElementById(color + 'RoundWins');
+            container.innerHTML = '';
+            if (bestOfThree) {
+                for (let i = 0; i < 2; i++) {
+                    const square = document.createElement('div');
+                    square.className = 'round-win-square';
+                    if (i < count) {
+                        square.style.backgroundColor = color === 'blue' ? '#0000ff' : '#ff0000';
+                    }
+                    container.appendChild(square);
+                }
+                container.style.display = 'flex';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        function updateGamjeoms(color, count) {
+            const container = document.getElementById(color + 'Gamjeoms');
+            container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const square = document.createElement('div');
+                square.className = 'gamjeom-square';
+                if (i < count) {
+                    square.style.backgroundColor = color === 'blue' ? '#0000ff' : '#ff0000';
+                }
+                container.appendChild(square);
+            }
+        }
+
+        document.getElementById('addMode').addEventListener('click', () => {
+            mode = 'add';
+            document.getElementById('addMode').classList.add('active');
+            document.getElementById('subtractMode').classList.remove('active');
+        });
+
+        document.getElementById('subtractMode').addEventListener('click', () => {
+            mode = 'subtract';
+            document.getElementById('subtractMode').classList.add('active');
+            document.getElementById('addMode').classList.remove('active');
+        });
+    </script>
+</body>
+</html>
